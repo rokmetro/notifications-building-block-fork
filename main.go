@@ -66,30 +66,31 @@ func main() {
 	storageAdapter := storage.NewStorageAdapter(mongoDBAuth, mongoDBName, mongoTimeout, mtOrgID, mtAppID, logger)
 	err := storageAdapter.Start()
 	if err != nil {
-		log.Fatal("Cannot start the mongoDB adapter - " + err.Error())
+		logger.Fatal("Cannot start the mongoDB adapter - " + err.Error())
 	}
 
 	// firebase adapter
 	firebaseConfs, err := storageAdapter.LoadFirebaseConfigurations()
 	_, err = storageAdapter.LoadFirebaseConfigurations()
 	if err != nil {
-		log.Fatal("Error loading the firebase confogirations from the storage - " + err.Error())
+		logger.Fatal("Error loading the firebase configurations from the storage - " + err.Error())
 	}
 	firebaseAdapter := firebase.NewFirebaseAdapter()
 	err = firebaseAdapter.Start(firebaseConfs)
 	if err != nil {
-		log.Fatal("Cannot start the Firebase adapter - " + err.Error())
+		logger.Warn("Cannot start the Firebase adapter - " + err.Error())
 	}
 
 	//airship adapter
-	airshipHost := getEnvKey("AIRSHIP_HOST", true)
-	airshipAdapter := airship.NewAirshipAdapter(airshipHost)
+	airshipHost := getEnvKey("NOTIFICATIONS_AIRSHIP_HOST", false)
+	airshipBearerToken := getEnvKey("NOTIFICATIONS_AIRSHIP_BEARER_TOKEN", false)
+	airshipAdapter := airship.NewAirshipAdapter(airshipHost, airshipBearerToken)
 
-	smtpHost := getEnvKey("SMTP_HOST", true)
-	smtpPort := getEnvKey("SMTP_PORT", true)
-	smtpUser := getEnvKey("SMTP_USER", true)
-	smtpPassword := getEnvKey("SMTP_PASSWORD", true)
-	smtpFrom := getEnvKey("SMTP_EMAIL_FROM", true)
+	smtpHost := getEnvKey("SMTP_HOST", false)
+	smtpPort := getEnvKey("SMTP_PORT", false)
+	smtpUser := getEnvKey("SMTP_USER", false)
+	smtpPassword := getEnvKey("SMTP_PASSWORD", false)
+	smtpFrom := getEnvKey("SMTP_EMAIL_FROM", false)
 	smtpPortNum, _ := strconv.Atoi(smtpPort)
 	mailAdapter := mailer.NewMailerAdapter(smtpHost, smtpPortNum, smtpUser, smtpPassword, smtpFrom)
 
@@ -118,25 +119,28 @@ func main() {
 
 	//core adapter
 	serviceAccountID := getEnvKey("NOTIFICATIONS_SERVICE_ACCOUNT_ID", false)
-	privKeyRaw := getEnvKey("NOTIFICATIONS_PRIV_KEY", true)
-	privKeyRaw = strings.ReplaceAll(privKeyRaw, "\\n", "\n")
-	privKey, err := keys.NewPrivKey(keys.RS256, privKeyRaw)
-	if err != nil {
-		log.Fatalf("Failed to parse auth priv key: %v", err)
-	}
-	signatureAuth, err := sigauth.NewSignatureAuth(privKey, serviceRegManager, false, false)
-	if err != nil {
-		log.Fatalf("Error initializing signature auth: %v", err)
-	}
+	privKeyRaw := getEnvKey("NOTIFICATIONS_PRIV_KEY", false)
+	var serviceAccountManager *authservice.ServiceAccountManager
+	if privKeyRaw != "" {
+		privKeyRaw = strings.ReplaceAll(privKeyRaw, "\\n", "\n")
+		privKey, err := keys.NewPrivKey(keys.RS256, privKeyRaw)
+		if err != nil {
+			log.Fatalf("Failed to parse auth priv key: %v", err)
+		}
+		signatureAuth, err := sigauth.NewSignatureAuth(privKey, serviceRegManager, false, false)
+		if err != nil {
+			log.Fatalf("Error initializing signature auth: %v", err)
+		}
 
-	serviceAccountLoader, err := authservice.NewRemoteServiceAccountLoader(&authService, serviceAccountID, signatureAuth)
-	if err != nil {
-		log.Fatalf("Error initializing remote service account loader: %v", err)
-	}
+		serviceAccountLoader, err := authservice.NewRemoteServiceAccountLoader(&authService, serviceAccountID, signatureAuth)
+		if err != nil {
+			log.Fatalf("Error initializing remote service account loader: %v", err)
+		}
 
-	serviceAccountManager, err := authservice.NewServiceAccountManager(&authService, serviceAccountLoader)
-	if err != nil {
-		log.Fatalf("Error initializing service account manager: %v", err)
+		serviceAccountManager, err = authservice.NewServiceAccountManager(&authService, serviceAccountLoader)
+		if err != nil {
+			log.Fatalf("Error initializing service account manager: %v", err)
+		}
 	}
 
 	coreAdapter := corebb.NewCoreAdapter(coreBBHost, serviceAccountManager)

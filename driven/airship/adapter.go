@@ -9,18 +9,20 @@ import (
 	"time"
 )
 
+// Adapter is the Airship adapter
 type Adapter struct {
-	airshipHost string
+	host        string
+	bearerToken string
 }
 
-// NewAirshipAdapter creates a new airship adapter instance
-func NewAirshipAdapter(airshipHost string) *Adapter {
-
-	return &Adapter{airshipHost: airshipHost}
+// NewAirshipAdapter creates a new Airship adapter instance
+func NewAirshipAdapter(host string, bearerToken string) *Adapter {
+	return &Adapter{host: host, bearerToken: bearerToken}
 }
 
+// SendNotificationToToken sends a notification to an Airship token
 func (a *Adapter) SendNotificationToToken(orgID string, appID string, deviceToken string, title string, body string, data map[string]string) error {
-	url := fmt.Sprintf(a.airshipHost)
+	url := fmt.Sprintf(a.host)
 
 	client := &http.Client{
 		Timeout: 120 * time.Second,
@@ -41,14 +43,14 @@ func (a *Adapter) SendNotificationToToken(orgID string, appID string, deviceToke
 		"alert": iosAlert,
 	}
 
-	andoridNotification := map[string]interface{}{
+	androidNotification := map[string]interface{}{
 		"title": title,
 		"alert": body,
 	}
 
 	notification := map[string]interface{}{
 		"ios":     iosNotification,
-		"android": andoridNotification,
+		"android": androidNotification,
 	}
 
 	//TODO check body for additional urls, localization and additional parameters for notification
@@ -71,7 +73,7 @@ func (a *Adapter) SendNotificationToToken(orgID string, appID string, deviceToke
 		return err
 	}
 
-	bearerToken := data["bearer_token"]
+	bearerToken := a.bearerToken
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
 
 	resp, err := client.Do(req)
@@ -86,8 +88,6 @@ func (a *Adapter) SendNotificationToToken(orgID string, appID string, deviceToke
 	if resp.StatusCode != 200 {
 		log.Printf("error with airship response code - %d", resp.StatusCode)
 		return fmt.Errorf("error with airship response code != 200")
-	} else {
-		return nil
 	}
-
+	return nil
 }

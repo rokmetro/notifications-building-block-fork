@@ -51,7 +51,7 @@ func (app *Application) subscribeToTopic(orgID string, appID string, token strin
 	var err error
 	if !anonymous {
 		err = app.storage.SubscribeToTopic(orgID, appID, token, userID, topic)
-		if err == nil {
+		if err == nil && token != "" {
 			err = app.firebase.SubscribeToTopic(orgID, appID, token, topic)
 		}
 	} else if token != "" {
@@ -65,7 +65,7 @@ func (app *Application) unsubscribeToTopic(orgID string, appID string, token str
 	var err error
 	if !anonymous {
 		err = app.storage.UnsubscribeToTopic(orgID, appID, token, userID, topic)
-		if err == nil {
+		if err == nil && token != "" {
 			err = app.firebase.UnsubscribeToTopic(orgID, appID, token, topic)
 		}
 	} else if token != "" {

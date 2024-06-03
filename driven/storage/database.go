@@ -43,7 +43,7 @@ type database struct {
 	messagesRecipients *collectionWrapper
 	queue              *collectionWrapper
 	queueData          *collectionWrapper
-	configs  *collectionWrapper
+	configs            *collectionWrapper
 
 	appVersions  *collectionWrapper
 	appPlatforms *collectionWrapper

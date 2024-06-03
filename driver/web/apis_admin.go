@@ -384,6 +384,7 @@ func (h AdminApisHandler) GetMessagesStats(l *logs.Log, r *http.Request, claims 
 	return l.HTTPResponseSuccessJSON(data)
 }
 
+// GetConfig retrieves a config document
 func (h AdminApisHandler) GetConfig(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	params := mux.Vars(r)
 	id := params["id"]
@@ -404,6 +405,7 @@ func (h AdminApisHandler) GetConfig(l *logs.Log, r *http.Request, claims *tokena
 	return l.HTTPResponseSuccessJSON(data)
 }
 
+// GetConfigs retrieves multiple config documents
 func (h AdminApisHandler) GetConfigs(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	var configType *string
 	typeParam := r.URL.Query().Get("type")
@@ -432,6 +434,7 @@ type adminUpdateConfigsRequest struct {
 	Type    string      `json:"type"`
 }
 
+// CreateConfig creates a config document
 func (h AdminApisHandler) CreateConfig(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	var requestData adminUpdateConfigsRequest
 	err := json.NewDecoder(r.Body).Decode(&requestData)
@@ -462,6 +465,7 @@ func (h AdminApisHandler) CreateConfig(l *logs.Log, r *http.Request, claims *tok
 	return l.HTTPResponseSuccessJSON(data)
 }
 
+// UpdateConfig updates a config document
 func (h AdminApisHandler) UpdateConfig(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	params := mux.Vars(r)
 	id := params["id"]
@@ -493,6 +497,7 @@ func (h AdminApisHandler) UpdateConfig(l *logs.Log, r *http.Request, claims *tok
 	return l.HTTPResponseSuccess()
 }
 
+// DeleteConfig deletes a config document
 func (h AdminApisHandler) DeleteConfig(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	params := mux.Vars(r)
 	id := params["id"]

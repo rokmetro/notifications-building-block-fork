@@ -269,7 +269,7 @@ func (q queueLogic) sendNotifications(queueItem model.QueueItem, firebaseTokens 
 
 	for _, aToken := range airshipTokens {
 		token := aToken.Token
-		sendErr := q.airship.SendNotificationToToken(queueItem.OrgID, queueItem.AppID, token, queueItem.Subject, queueItem.Body, queueItem.Data,)
+		sendErr := q.airship.SendNotificationToToken(queueItem.OrgID, queueItem.AppID, token, queueItem.Subject, queueItem.Body, queueItem.Data)
 		if sendErr != nil {
 			q.logger.Errorf("error send notification to token (%s): %s", token, sendErr)
 		} else {

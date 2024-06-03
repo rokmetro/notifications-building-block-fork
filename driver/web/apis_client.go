@@ -201,10 +201,6 @@ func (h ApisHandler) Subscribe(l *logs.Log, r *http.Request, claims *tokenauth.C
 		return l.HTTPResponseErrorAction(logutils.ActionDecode, logutils.TypeRequestBody, nil, err, http.StatusBadRequest, true)
 	}
 
-	if len(*body.Token) == 0 {
-		return l.HTTPResponseErrorData(logutils.StatusMissing, logutils.TypeToken, nil, nil, http.StatusBadRequest, false)
-	}
-
 	err = h.app.Services.SubscribeToTopic(claims.OrgID, claims.AppID, *body.Token, claims.Subject, claims.Anonymous, topic)
 	if err != nil {
 		return l.HTTPResponseErrorAction("subscribing", "topic", nil, err, http.StatusInternalServerError, true)

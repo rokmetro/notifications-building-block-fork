@@ -3,6 +3,7 @@
         "MONGO_AUTH": "<mongo auth url>",
         "SMTP_PASSWORD": "<smtp password>",
         "INTERNAL_API_KEY": "<internal api key>",
+        "CORE_AUTH_PRIVATE_KEY": "",
         "NOTIFICATIONS_PRIV_KEY": "<service account priv key>"
     },
     "app_config":{

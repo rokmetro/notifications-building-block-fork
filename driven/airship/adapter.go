@@ -31,7 +31,7 @@ func (a *Adapter) SendNotificationToToken(orgID string, appID string, deviceToke
 	deviceTypes := [2]string{"ios", "android"}
 
 	audience := map[string]interface{}{
-		"device_token": deviceToken,
+		"channel": deviceToken,
 	}
 
 	iosAlert := map[string]interface{}{

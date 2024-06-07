@@ -25,7 +25,7 @@ import (
 	"github.com/rokwire/logging-library-go/v2/errors"
 )
 
-func (app *Application) sharedCreateMessages(imMessages []model.InputMessage) ([]model.Message, error) {
+func (app *Application) sharedCreateMessages(imMessages []model.InputMessage, isBatch bool) ([]model.Message, error) {
 
 	if len(imMessages) == 0 {
 		return nil, errors.New("no data")
@@ -43,17 +43,36 @@ func (app *Application) sharedCreateMessages(imMessages []model.InputMessage) ([
 		allQueueItems := []model.QueueItem{}
 
 		//process every message
-		for _, im := range imMessages {
-			message, recipients, err := app.sharedHandleInputMessage(context, im)
-			if err != nil {
-				fmt.Printf("error on handling a message: %s", err)
-				return err
+		if isBatch {
+			inputMessageMap := make(map[string]struct{}, len(imMessages))
+			for _, im := range imMessages {	
+				//check to ensure we dont send duplicated messages
+				_, ok := inputMessageMap[im.Sender.User.UserID]
+				if !ok {
+					message, recipients, err := app.sharedHandleInputMessage(context, im)
+					if err != nil {
+						fmt.Printf("error on handling a message: %s", err)
+						return err
+					}
+					queueItems := app.sharedCreateQueueItems(*message, recipients)
+					allMessages = append(allMessages, *message)
+					allRecipients = append(allRecipients, recipients...)
+					allQueueItems = append(allQueueItems, queueItems...)
+					inputMessageMap[im.Sender.User.UserID] = struct{}{} 
+				}
 			}
-			queueItems := app.sharedCreateQueueItems(*message, recipients)
-
-			allMessages = append(allMessages, *message)
-			allRecipients = append(allRecipients, recipients...)
-			allQueueItems = append(allQueueItems, queueItems...)
+		} else {
+			for _, im := range imMessages {
+				message, recipients, err := app.sharedHandleInputMessage(context, im)
+				if err != nil {
+					fmt.Printf("error on handling a message: %s", err)
+					return err
+				}
+				queueItems := app.sharedCreateQueueItems(*message, recipients)
+				allMessages = append(allMessages, *message)
+				allRecipients = append(allRecipients, recipients...)
+				allQueueItems = append(allQueueItems, queueItems...)
+			}
 		}
 
 		//store the messages object
@@ -149,9 +168,6 @@ func (app *Application) sharedCreateQueueItems(message model.Message, messageRec
 		subject := message.Subject
 		body := message.Body
 		data := message.Data
-		if message.Topic != nil {
-			data["topic"] = *message.Topic
-		}
 
 		time := message.Time
 		priority := message.Priority
@@ -170,7 +186,7 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 	orgID string, appID string,
 	subject string, body string,
 	recipients []model.MessageRecipient, recipientsCriteriaList []model.RecipientCriteria,
-	recipientAccountCriteria map[string]interface{}, topic *string, messageID string) ([]model.MessageRecipient, error) {
+	recipientAccountCriteria map[string]interface{}, topic *[]string, messageID string) ([]model.MessageRecipient, error) {
 
 	messageRecipients := []model.MessageRecipient{}
 	checkCriteria := true

@@ -20,6 +20,7 @@ import (
 	"notifications/core"
 	"notifications/core/model"
 	Def "notifications/driver/web/docs/gen"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -60,6 +61,12 @@ func (h BBsAPIsHandler) SendMessage(l *logs.Log, r *http.Request, claims *tokena
 		return l.HTTPResponseErrorAction(logutils.ActionDecode, logutils.TypeRequestBody, nil, err, http.StatusBadRequest, true)
 	}
 
+	isBatch := false //false by default
+	isBatchParam := r.URL.Query().Get("isBatch")
+	if isBatchParam != "" {
+		isBatch, _ = strconv.ParseBool(isBatchParam)
+	}
+
 	inputData := bodyData.Message
 
 	if len(inputData.OrgId) == 0 || len(inputData.AppId) == 0 {
@@ -81,7 +88,7 @@ func (h BBsAPIsHandler) SendMessage(l *logs.Log, r *http.Request, claims *tokena
 
 	inputMessages := []model.InputMessage{inputMessage} //only one message
 
-	messages, err := h.app.BBs.BBsCreateMessages(inputMessages)
+	messages, err := h.app.BBs.BBsCreateMessages(inputMessages, isBatch)
 	if err != nil {
 		return l.HTTPResponseErrorAction(logutils.ActionSend, "message", nil, err, http.StatusInternalServerError, true)
 	}
@@ -98,6 +105,7 @@ func (h BBsAPIsHandler) SendMessage(l *logs.Log, r *http.Request, claims *tokena
 }
 
 // SendMessages sends messages
+// TODO accept batch query param
 func (h BBsAPIsHandler) SendMessages(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
 	var bodyData Def.SharedReqCreateMessages
 	err := json.NewDecoder(r.Body).Decode(&bodyData)

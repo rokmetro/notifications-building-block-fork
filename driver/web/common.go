@@ -70,9 +70,8 @@ func getMessageData(inputMessage Def.SharedReqCreateMessage) model.InputMessage 
 	inputRecipients := messagesRecipientsListFromDef(inputMessage.Recipients)
 	recipientsCriteria := recipientsCriteriaListFromDef(inputMessage.RecipientsCriteriaList)
 	recipientsAccountCriteria := inputMessage.RecipientAccountCriteria
-	topic := inputMessage.Topic
 
 	return model.InputMessage{ID: inputMessage.Id, Time: mTime, Priority: priority, Subject: subject,
-		Body: body, Data: inputData, Topic: topic, InputRecipients: inputRecipients,
+		Body: body, Data: inputData, Topic: inputMessage.Topic, InputRecipients: inputRecipients,
 		RecipientsCriteriaList: recipientsCriteria, RecipientAccountCriteria: recipientsAccountCriteria}
 }

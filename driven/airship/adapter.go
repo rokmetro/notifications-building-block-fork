@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type M map[string]interface{}
+type m map[string]interface{}
 
 // Adapter is the Airship adapter
 type Adapter struct {
@@ -32,20 +32,20 @@ func (a *Adapter) SendNotificationToToken(orgID string, appID string, deviceToke
 
 	//TODO check body for additional urls, localization and additional parameters for notification
 
-	ios := M{
-		"alert": M{
+	ios := m{
+		"alert": m{
 			"title": title,
 			"body":  body,
 		},
 	}
-	android := M{
+	android := m{
 		"title": title,
 		"alert": body,
 	}
 
 	if val, ok := data["url"]; ok {
-		actions := M{
-			"open": M{
+		actions := m{
+			"open": m{
 				"type":    "url",
 				"content": val,
 			},
@@ -54,12 +54,12 @@ func (a *Adapter) SendNotificationToToken(orgID string, appID string, deviceToke
 		android["actions"] = actions
 	}
 
-	bodyData := M{
+	bodyData := m{
 		"device_types": []string{"ios", "android"},
-		"audience": M{
+		"audience": m{
 			"channel": deviceToken,
 		},
-		"notification": M{
+		"notification": m{
 			"ios":     ios,
 			"android": android,
 		},

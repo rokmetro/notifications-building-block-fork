@@ -67,6 +67,8 @@ func getMessageData(inputMessage Def.SharedReqCreateMessage) model.InputMessage 
 	for key, value := range inputMessage.Data {
 		inputData[key] = fmt.Sprintf("%v", value)
 	}
+
+	//TODO combine topics and topic
 	inputRecipients := messagesRecipientsListFromDef(inputMessage.Recipients)
 	recipientsCriteria := recipientsCriteriaListFromDef(inputMessage.RecipientsCriteriaList)
 	recipientsAccountCriteria := inputMessage.RecipientAccountCriteria

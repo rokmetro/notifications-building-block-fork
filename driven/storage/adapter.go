@@ -337,12 +337,12 @@ func (sa Adapter) GetDeviceTokensByRecipients(orgID string, appID string, recipi
 }
 
 // GetUsersByTopicWithContext Gets all users for topic topic
-func (sa Adapter) GetUsersByTopicWithContext(ctx context.Context, orgID string, appID string, topics []string) ([]model.User, error) {
-	if len(topics) > 0 {
+func (sa Adapter) GetUsersByTopicWithContext(ctx context.Context, orgID string, appID string, topic string) ([]model.User, error) {
+	if len(topic) > 0 {
 		filter := bson.D{
 			primitive.E{Key: "org_id", Value: orgID},
 			primitive.E{Key: "app_id", Value: appID},
-			primitive.E{Key: "topics", Value: bson.M{"$in": topics}},
+			primitive.E{Key: "topics", Value: topic},
 		}
 
 		var tokenMappings []model.User
@@ -353,16 +353,19 @@ func (sa Adapter) GetUsersByTopicWithContext(ctx context.Context, orgID string, 
 
 		result := []model.User{}
 		for _, user := range tokenMappings {
-			for _, topic := range topics {
-				if user.HasTopic(topic) {
-					result = append(result, user)
-				}
+			if user.HasTopic(topic) {
+				result = append(result, user)
 			}
+			// for _, topic := range topics {
+			// 	if user.HasTopic(topic) {
+			// 		result = append(result, user)
+			// 	}
+			// }
 		}
 
 		return result, nil
 	}
-	return nil, fmt.Errorf("no mapped recipients to the following topics: %s", topics)
+	return nil, fmt.Errorf("no mapped recipients to %s topic", topic)
 }
 
 // GetUsersByRecipientCriteriasWithContext gets users list by list of criteria
@@ -746,7 +749,7 @@ func (sa Adapter) FindMessagesRecipientsDeep(orgID string, appID string, userID 
 		Recipients                []model.MessageRecipient  `bson:"recipients"`
 		RecipientsCriteriaList    []model.RecipientCriteria `bson:"recipients_criteria_list"`
 		RecipientAccountCriteria  map[string]interface{}    `bson:"recipient_account_criteria"`
-		Topic                     *[]string                 `bson:"topic"`
+		Topic                     *string                   `bson:"topic"`
 		CalculatedRecipientsCount *int                      `bson:"calculated_recipients_count"`
 		DateCreated               *time.Time                `bson:"date_created"`
 		DateUpdated               *time.Time                `bson:"date_updated"`

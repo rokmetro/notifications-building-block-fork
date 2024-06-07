@@ -45,7 +45,7 @@ func (app *Application) sharedCreateMessages(imMessages []model.InputMessage, is
 		//process every message
 		if isBatch {
 			inputMessageMap := make(map[string]struct{}, len(imMessages))
-			for _, im := range imMessages {	
+			for _, im := range imMessages {
 				//check to ensure we dont send duplicated messages
 				_, ok := inputMessageMap[im.Sender.User.UserID]
 				if !ok {
@@ -58,7 +58,7 @@ func (app *Application) sharedCreateMessages(imMessages []model.InputMessage, is
 					allMessages = append(allMessages, *message)
 					allRecipients = append(allRecipients, recipients...)
 					allQueueItems = append(allQueueItems, queueItems...)
-					inputMessageMap[im.Sender.User.UserID] = struct{}{} 
+					inputMessageMap[im.Sender.User.UserID] = struct{}{}
 				}
 			}
 		} else {
@@ -186,7 +186,7 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 	orgID string, appID string,
 	subject string, body string,
 	recipients []model.MessageRecipient, recipientsCriteriaList []model.RecipientCriteria,
-	recipientAccountCriteria map[string]interface{}, topic *[]string, messageID string) ([]model.MessageRecipient, error) {
+	recipientAccountCriteria map[string]interface{}, topic *string, messageID string) ([]model.MessageRecipient, error) {
 
 	messageRecipients := []model.MessageRecipient{}
 	checkCriteria := true

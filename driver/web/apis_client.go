@@ -259,7 +259,7 @@ type getUserMessageResponse struct {
 	Recipients                []model.MessageRecipient  `json:"recipients"`
 	RecipientsCriteriaList    []model.RecipientCriteria `json:"recipients_criteria_list"`
 	RecipientAccountCriteria  map[string]interface{}    `json:"recipient_account_criteria"`
-	Topic                     *[]string                 `json:"topic"`
+	Topic                     *string                   `json:"topic"`
 	CalculatedRecipientsCount *int                      `json:"calculated_recipients_count"`
 	DateCreated               *time.Time                `json:"date_created"`
 	DateUpdated               *time.Time                `json:"date_updated"`

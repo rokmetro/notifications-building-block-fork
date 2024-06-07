@@ -171,7 +171,9 @@ type SharedReqCreateMessage struct {
 	RecipientsCriteriaList   []SharedReqCreateMessageInputRecipientCriteria `json:"recipients_criteria_list"`
 	Subject                  string                                         `json:"subject"`
 	Time                     *int64                                         `json:"time,omitempty"`
-	Topic                    *[]string                                        `json:"topic,omitempty"`
+	Topic                    *string                                        `json:"topic,omitempty"`
+	Topics                   *[]string                                       `json:"topics,omitempty"`
+
 }
 
 // SharedReqCreateMessageInputMessageRecipient defines model for _shared_req_CreateMessage_InputMessageRecipient.

@@ -61,12 +61,6 @@ func (h BBsAPIsHandler) SendMessage(l *logs.Log, r *http.Request, claims *tokena
 		return l.HTTPResponseErrorAction(logutils.ActionDecode, logutils.TypeRequestBody, nil, err, http.StatusBadRequest, true)
 	}
 
-	isBatch := false //false by default
-	isBatchParam := r.URL.Query().Get("isBatch")
-	if isBatchParam != "" {
-		isBatch, _ = strconv.ParseBool(isBatchParam)
-	}
-
 	inputData := bodyData.Message
 
 	if len(inputData.OrgId) == 0 || len(inputData.AppId) == 0 {
@@ -88,7 +82,7 @@ func (h BBsAPIsHandler) SendMessage(l *logs.Log, r *http.Request, claims *tokena
 
 	inputMessages := []model.InputMessage{inputMessage} //only one message
 
-	messages, err := h.app.BBs.BBsCreateMessages(inputMessages, isBatch)
+	messages, err := h.app.BBs.BBsCreateMessages(inputMessages, false)
 	if err != nil {
 		return l.HTTPResponseErrorAction(logutils.ActionSend, "message", nil, err, http.StatusInternalServerError, true)
 	}
@@ -105,8 +99,14 @@ func (h BBsAPIsHandler) SendMessage(l *logs.Log, r *http.Request, claims *tokena
 }
 
 // SendMessages sends messages
-// TODO accept batch query param
 func (h BBsAPIsHandler) SendMessages(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
+
+	isBatch := false //false by default
+	isBatchParam := r.URL.Query().Get("isBatch")
+	if isBatchParam != "" {
+		isBatch, _ = strconv.ParseBool(isBatchParam)
+	}
+
 	var bodyData Def.SharedReqCreateMessages
 	err := json.NewDecoder(r.Body).Decode(&bodyData)
 	if err != nil {
@@ -136,7 +136,7 @@ func (h BBsAPIsHandler) SendMessages(l *logs.Log, r *http.Request, claims *token
 		inputMessages = append(inputMessages, inputMessage)
 	}
 
-	createdMessages, err := h.app.BBs.BBsCreateMessages(inputMessages)
+	createdMessages, err := h.app.BBs.BBsCreateMessages(inputMessages, isBatch)
 	if err != nil {
 		return l.HTTPResponseErrorAction(logutils.ActionSend, "message", nil, err, http.StatusInternalServerError, true)
 	}

@@ -132,7 +132,7 @@ func (app *Application) sharedHandleInputMessage(context storage.TransactionCont
 	//calculate the recipients
 	recipients, err := app.sharedCalculateRecipients(context, im.OrgID, im.AppID,
 		im.Subject, im.Body, im.InputRecipients, im.RecipientsCriteriaList,
-		im.RecipientAccountCriteria, im.Topic, *messageID)
+		im.RecipientAccountCriteria, im.Topics, *messageID)
 	if err != nil {
 		fmt.Printf("error on calculating recipients for a message: %s", err)
 		return nil, nil, err
@@ -147,7 +147,7 @@ func (app *Application) sharedHandleInputMessage(context storage.TransactionCont
 	dateCreated := time.Now()
 	message := model.Message{OrgID: im.OrgID, AppID: im.AppID, ID: *messageID, Priority: im.Priority, Time: im.Time,
 		Subject: im.Subject, Sender: im.Sender, Body: im.Body, Data: im.Data, RecipientsCriteriaList: im.RecipientsCriteriaList,
-		RecipientAccountCriteria: im.RecipientAccountCriteria, Topic: im.Topic, CalculatedRecipientsCount: &calculatedRecipients, DateCreated: &dateCreated}
+		RecipientAccountCriteria: im.RecipientAccountCriteria, Topic: im.Topic, Topics: im.Topics, CalculatedRecipientsCount: &calculatedRecipients, DateCreated: &dateCreated}
 
 	return &message, recipients, nil
 }
@@ -186,7 +186,7 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 	orgID string, appID string,
 	subject string, body string,
 	recipients []model.MessageRecipient, recipientsCriteriaList []model.RecipientCriteria,
-	recipientAccountCriteria map[string]interface{}, topic *string, messageID string) ([]model.MessageRecipient, error) {
+	recipientAccountCriteria map[string]interface{}, topics *[]string, messageID string) ([]model.MessageRecipient, error) {
 
 	messageRecipients := []model.MessageRecipient{}
 	checkCriteria := true
@@ -210,32 +210,34 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 	}
 
 	// recipients from topic
-	if topic != nil {
-		topicUsers, err := app.storage.GetUsersByTopicWithContext(context, orgID,
-			appID, *topic)
-		if err != nil {
-			fmt.Printf("error retrieving recipients by topic (%s): %s", *topic, err)
-			return nil, err
-		}
-		log.Printf("retrieve recipients (%+v) for topic (%s)", topicUsers, *topic)
-
-		topicRecipients := make([]model.MessageRecipient, len(topicUsers))
-		for i, item := range topicUsers {
-			topicRecipients[i] = model.MessageRecipient{
-				OrgID: orgID, AppID: appID, ID: uuid.NewString(), UserID: item.UserID,
-				MessageID: messageID, DateCreated: &now,
+	if topics != nil {
+		for _, topic := range *topics {
+			topicUsers, err := app.storage.GetUsersByTopicWithContext(context, orgID,
+				appID, topic)
+			if err != nil {
+				fmt.Printf("error retrieving recipients by topic (%s): %s", topic, err)
+				return nil, err
 			}
-		}
+			log.Printf("retrieve recipients (%+v) for topic (%s)", topicUsers, topic)
 
-		if len(topicRecipients) > 0 {
-			if len(messageRecipients) > 0 {
-				messageRecipients = sharedGetCommonRecipients(messageRecipients, topicRecipients)
+			topicRecipients := make([]model.MessageRecipient, len(topicUsers))
+			for i, item := range topicUsers {
+				topicRecipients[i] = model.MessageRecipient{
+					OrgID: orgID, AppID: appID, ID: uuid.NewString(), UserID: item.UserID,
+					MessageID: messageID, DateCreated: &now,
+				}
+			}
+
+			if len(topicRecipients) > 0 {
+				if len(messageRecipients) > 0 {
+					messageRecipients = sharedGetCommonRecipients(messageRecipients, topicRecipients)
+				} else {
+					messageRecipients = append(messageRecipients, topicRecipients...)
+				}
 			} else {
-				messageRecipients = append(messageRecipients, topicRecipients...)
+				checkCriteria = false
+				messageRecipients = nil
 			}
-		} else {
-			checkCriteria = false
-			messageRecipients = nil
 		}
 
 		log.Printf("construct recipients (%+v) for message (%s:%s:%s)",

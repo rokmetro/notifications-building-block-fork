@@ -68,12 +68,13 @@ func getMessageData(inputMessage Def.SharedReqCreateMessage) model.InputMessage 
 		inputData[key] = fmt.Sprintf("%v", value)
 	}
 
-	//TODO combine topics and topic
+	//TODO add topic to topics array
+	topics := append(*inputMessage.Topics, *inputMessage.Topic)
 	inputRecipients := messagesRecipientsListFromDef(inputMessage.Recipients)
 	recipientsCriteria := recipientsCriteriaListFromDef(inputMessage.RecipientsCriteriaList)
 	recipientsAccountCriteria := inputMessage.RecipientAccountCriteria
 
 	return model.InputMessage{ID: inputMessage.Id, Time: mTime, Priority: priority, Subject: subject,
-		Body: body, Data: inputData, Topic: inputMessage.Topic, InputRecipients: inputRecipients,
+		Body: body, Data: inputData, Topic: inputMessage.Topic, Topics: &topics, InputRecipients: inputRecipients,
 		RecipientsCriteriaList: recipientsCriteria, RecipientAccountCriteria: recipientsAccountCriteria}
 }

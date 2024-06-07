@@ -35,7 +35,7 @@ type InputMessage struct {
 	RecipientsCriteriaList   []RecipientCriteria
 	RecipientAccountCriteria map[string]interface{}
 	Topic                    *string
-	Topics                   *[]string
+	Topics                   []string
 }
 
 // InputMessageRecipient represents the data structure needed for creating a message recipient. It is the input data for the core module.
@@ -64,7 +64,7 @@ type Message struct {
 	RecipientsCriteriaList   []RecipientCriteria    `json:"recipients_criteria_list" bson:"recipients_criteria_list"`
 	RecipientAccountCriteria map[string]interface{} `json:"recipient_account_criteria" bson:"recipient_account_criteria"`
 	Topic                    *string                `json:"topic" bson:"topic"`
-	Topics                   *[]string              `json:"topics" bson:"topics"`
+	Topics                   []string               `json:"topics" bson:"topics"`
 
 	//initialy calculated recipients count
 	//if nil then it means that the message was created before the refactoring

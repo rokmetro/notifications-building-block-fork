@@ -336,13 +336,13 @@ func (sa Adapter) GetDeviceTokensByRecipients(orgID string, appID string, recipi
 	return nil, fmt.Errorf("empty recient information")
 }
 
-// GetUsersByTopicWithContext Gets all users for topic topic
-func (sa Adapter) GetUsersByTopicWithContext(ctx context.Context, orgID string, appID string, topic string) ([]model.User, error) {
-	if len(topic) > 0 {
+// GetUsersByTopicsWithContext Gets all users for topics
+func (sa Adapter) GetUsersByTopicsWithContext(ctx context.Context, orgID string, appID string, topics []string) ([]model.User, error) {
+	if len(topics) > 0 {
 		filter := bson.D{
 			primitive.E{Key: "org_id", Value: orgID},
 			primitive.E{Key: "app_id", Value: appID},
-			primitive.E{Key: "topics", Value: topic},
+			primitive.E{Key: "topics", Value: bson.M{"$in": topics}},
 		}
 
 		var tokenMappings []model.User
@@ -351,16 +351,17 @@ func (sa Adapter) GetUsersByTopicWithContext(ctx context.Context, orgID string, 
 			return nil, err
 		}
 
-		result := []model.User{}
-		for _, user := range tokenMappings {
-			if user.HasTopic(topic) {
-				result = append(result, user)
-			}
-		}
+		// TODO: was this necessary?
+		// result := []model.User{}
+		// for _, user := range tokenMappings {
+		// 	if user.HasTopic(topic) {
+		// 		result = append(result, user)
+		// 	}
+		// }
 
-		return result, nil
+		return tokenMappings, nil
 	}
-	return nil, fmt.Errorf("no mapped recipients to %s topic", topic)
+	return nil, fmt.Errorf("no mapped recipients to %s topics", topics)
 }
 
 // GetUsersByRecipientCriteriasWithContext gets users list by list of criteria
@@ -745,7 +746,7 @@ func (sa Adapter) FindMessagesRecipientsDeep(orgID string, appID string, userID 
 		RecipientsCriteriaList    []model.RecipientCriteria `bson:"recipients_criteria_list"`
 		RecipientAccountCriteria  map[string]interface{}    `bson:"recipient_account_criteria"`
 		Topic                     *string                   `bson:"topic"`
-		Topics                    *[]string                 `bson:"topics"`
+		Topics                    []string                  `bson:"topics"`
 		CalculatedRecipientsCount *int                      `bson:"calculated_recipients_count"`
 		DateCreated               *time.Time                `bson:"date_created"`
 		DateUpdated               *time.Time                `bson:"date_updated"`

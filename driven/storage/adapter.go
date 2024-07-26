@@ -511,6 +511,21 @@ func (sa Adapter) DeleteUserWithID(orgID string, appID string, userID string) er
 	return nil
 }
 
+// DeleteUsersWithIDs Deletes users
+func (sa Adapter) DeleteUsersWithIDs(ctx context.Context, orgID string, appID string, accountsIDs []string) error {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+		primitive.E{Key: "app_id", Value: appID},
+		primitive.E{Key: "user_id", Value: bson.M{"$in": accountsIDs}},
+	}
+
+	_, err := sa.db.users.DeleteManyWithContext(ctx, filter, nil)
+	if err != nil {
+		return errors.WrapErrorAction(logutils.ActionDelete, "user", nil, err)
+	}
+	return nil
+}
+
 // GetMessagesStats counts read/unread and muted/unmuted messages
 func (sa *Adapter) GetMessagesStats(userID string) (*model.MessagesStats, error) {
 	filter := bson.D{
@@ -911,6 +926,21 @@ func (sa Adapter) DeleteMessagesRecipientsForMessagesWithContext(ctx context.Con
 	return nil
 }
 
+// DeleteMessagesRecipientsForUsers deletes messages recipients for users
+func (sa Adapter) DeleteMessagesRecipientsForUsers(ctx context.Context, orgID string, appID string, accountsIDs []string) error {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+		primitive.E{Key: "app_id", Value: appID},
+		primitive.E{Key: "user_id", Value: bson.M{"$in": accountsIDs}},
+	}
+
+	_, err := sa.db.messagesRecipients.DeleteManyWithContext(ctx, filter, nil)
+	if err != nil {
+		return errors.WrapErrorAction(logutils.ActionDelete, "message recipient", nil, err)
+	}
+	return nil
+}
+
 // FindMessagesWithContext finds messages by ids using context
 func (sa Adapter) FindMessagesWithContext(ctx context.Context, ids []string) ([]model.Message, error) {
 	filter := bson.D{primitive.E{Key: "_id", Value: bson.M{"$in": ids}}}
@@ -1275,6 +1305,21 @@ func (sa *Adapter) DeleteQueueDataForMessagesWithContext(ctx context.Context, me
 // DeleteQueueDataForRecipientsWithContext removes queue data items for recepients
 func (sa *Adapter) DeleteQueueDataForRecipientsWithContext(ctx context.Context, recipientsIDs []string) error {
 	filter := bson.D{primitive.E{Key: "message_recipient_id", Value: bson.M{"$in": recipientsIDs}}}
+
+	_, err := sa.db.queueData.DeleteManyWithContext(ctx, filter, nil)
+	if err != nil {
+		return errors.WrapErrorAction(logutils.ActionDelete, "queue data", nil, err)
+	}
+	return nil
+}
+
+// DeleteQueueDataForUsers removes queue data items for users
+func (sa *Adapter) DeleteQueueDataForUsers(ctx context.Context, orgID string, appID string, accountsIDs []string) error {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+		primitive.E{Key: "app_id", Value: appID},
+		primitive.E{Key: "user_id", Value: bson.M{"$in": accountsIDs}},
+	}
 
 	_, err := sa.db.queueData.DeleteManyWithContext(ctx, filter, nil)
 	if err != nil {

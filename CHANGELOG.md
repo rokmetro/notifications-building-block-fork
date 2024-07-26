@@ -9,7 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add in Airship Push Notifications [#173](https://github.com/rokwire/notifications-building-block/issues/173)
 - Add multiple topic support
 
+## [1.21.0] - 2024-06-26
+### Fixed
+- Problem while deleting recipients from BB API [#178](https://github.com/rokwire/notifications-building-block/issues/178)
+
+## [1.20.0] - 2024-06-06
+### Added
+- Remove user data [#175](https://github.com/rokwire/notifications-building-block/issues/175)
+
 ## [1.19.0] - 2023-10-26
+
 ## [1.18.0] - 2023-09-20
 ### Changed
 - Use message.time field as a primary delivery time indicator [#168](https://github.com/rokwire/notifications-building-block/issues/168)

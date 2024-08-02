@@ -160,7 +160,6 @@ func main() {
 	application.Start()
 
 	// read CORS parameters from stored env config
-	var envData *model.EnvConfigData
 	var corsAllowedHeaders []string
 	var corsAllowedOrigins []string
 	envConfig, err := storageAdapter.FindConfig(model.ConfigTypeEnv, authutils.AllApps, authutils.AllOrgs)
@@ -168,7 +167,7 @@ func main() {
 		logger.Fatal(errors.WrapErrorAction(logutils.ActionFind, model.TypeConfig, nil, err).Error())
 	}
 	if envConfig != nil {
-		envData, err = model.GetConfigData[model.EnvConfigData](*envConfig)
+		envData, err := model.GetConfigData[model.EnvConfigData](*envConfig)
 		if err != nil {
 			logger.Fatal(errors.WrapErrorAction(logutils.ActionCast, model.TypeEnvConfigData, nil, err).Error())
 		}

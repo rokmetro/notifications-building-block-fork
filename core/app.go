@@ -58,7 +58,11 @@ type Application struct {
 	core     Core
 	airship  Airship
 
+	//gueue logic
 	queueLogic queueLogic
+
+	//delete data logic
+	deleteDataLogic deleteDataLogic
 }
 
 // Start starts the core part of the application
@@ -68,6 +72,7 @@ func (app *Application) Start() {
 	app.storage.RegisterStorageListener(&storageListener)
 
 	app.queueLogic.start()
+	app.deleteDataLogic.start()
 }
 
 // NewApplication creates new Application
@@ -76,8 +81,10 @@ func NewApplication(version string, build string, storage Storage, firebase Fire
 	timerDone := make(chan bool)
 	queueLogic := queueLogic{logger: logger, storage: storage, firebase: firebase, timerDone: timerDone, airship: airship}
 
+	deleteDataLogic := deleteDataLogic{logger: *logger, coreAdapter: core, storage: storage}
+
 	application := Application{version: version, build: build, storage: storage, firebase: firebase,
-		mailer: mailer, logger: logger, core: core, queueLogic: queueLogic, airship: airship}
+		mailer: mailer, logger: logger, core: core, queueLogic: queueLogic, deleteDataLogic: deleteDataLogic, airship: airship}
 
 	//add the drivers ports/interfaces
 	application.Services = &servicesImpl{app: &application}

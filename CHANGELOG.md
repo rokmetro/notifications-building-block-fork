@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add in Airship Push Notifications [#173](https://github.com/rokwire/notifications-building-block/issues/173)
 - Add multiple topic support
 
+## [1.21.1] - 2024-09-06
+### Fixed
+- Group Members receive Post Notifications even when Groups Notifications are overridden and disabled. [#181](https://github.com/rokwire/notifications-building-block/issues/181)
+
 ## [1.21.0] - 2024-06-26
 ### Fixed
 - Problem while deleting recipients from BB API [#178](https://github.com/rokwire/notifications-building-block/issues/178)

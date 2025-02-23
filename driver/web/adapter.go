@@ -87,7 +87,6 @@ func (we Adapter) Start() {
 	mainRouter.HandleFunc("/int/mail", we.wrapFunc(we.internalApisHandler.SendMail, we.auth.internal)).Methods("POST")
 	mainRouter.HandleFunc("/messages", we.wrapFunc(we.internalApisHandler.DeleteMessages, we.auth.internal)).Methods("DELETE")
 
-
 	// Client APIs
 	mainRouter.HandleFunc("/token", we.wrapFunc(we.apisHandler.StoreToken, we.auth.client.Standard)).Methods("POST")
 	mainRouter.HandleFunc("/user", we.wrapFunc(we.apisHandler.GetUser, we.auth.client.Standard)).Methods("GET")

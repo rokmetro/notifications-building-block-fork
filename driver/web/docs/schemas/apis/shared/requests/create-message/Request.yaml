@@ -24,6 +24,10 @@ properties:
     type: integer
   topic:
     type: string  
+  topics:
+    type: array
+    items:
+      type: string  
   subject:
     type: string
   body:

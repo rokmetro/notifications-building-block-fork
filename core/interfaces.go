@@ -142,7 +142,7 @@ func (s *servicesImpl) DeleteMessage(orgID string, appID string, messageID strin
 }
 
 func (s *servicesImpl) DeleteMessages(l *logs.Log, messagesIDs []string) error {
-	return s.app.DeleteMessages(l, messagesIDs)
+	return s.app.deleteMessages(l, messagesIDs)
 }
 
 func (s *servicesImpl) GetAllAppVersions(orgID string, appID string) ([]model.AppVersion, error) {

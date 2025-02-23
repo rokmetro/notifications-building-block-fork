@@ -113,8 +113,6 @@ paths:
       summary: Create messages
       description: |
         Create messages
-
-        **Auth:** Requires first-party service token with `send_message` permission
       security:
         - bearerAuth: []
       requestBody:
@@ -1516,6 +1514,10 @@ components:
           type: integer
         topic:
           type: string
+        topics:
+          type: array
+          items:
+            type: string
         subject:
           type: string
         body:

@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"notifications/core/model"
-	"notifications/driven/storage"
 	"time"
 
 	"github.com/google/uuid"
@@ -168,51 +167,8 @@ func (app *Application) deleteMessage(orgID string, appID string, ID string) err
 	return app.storage.DeleteMessagesWithContext(context.Background(), []string{ID})
 }
 
-func (app *Application) DeleteMessages(l *logs.Log, messagesIDs []string) error {
-	//in transaction
-	transaction := func(context storage.TransactionContext) error {
-		//find the messages
-		messages, err := app.storage.FindMessagesWithContext(context, messagesIDs)
-		if err != nil {
-			return err
-		}
-		if len(messagesIDs) != len(messages) {
-			return errors.New("not found message's")
-		}
-
-		//delete the message
-		messagesIDs := make([]string, len(messages))
-		for i, m := range messages {
-			messagesIDs[i] = m.ID
-		}
-		err = app.storage.DeleteMessagesWithContext(context, messagesIDs)
-		if err != nil {
-			return err
-		}
-
-		//delete the messages recipients
-		err = app.storage.DeleteMessagesRecipientsForMessagesWithContext(context, messagesIDs)
-		if err != nil {
-			return err
-		}
-
-		//delete the queue data items
-		err = app.storage.DeleteQueueDataForMessagesWithContext(context, messagesIDs)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	//perform transactions
-	err := app.storage.PerformTransaction(transaction, 2000)
-	if err != nil {
-		l.Errorf("error on performing delete message transaction - %s", err)
-		return err
-	}
-
-	return nil
+func (app *Application) deleteMessages(l *logs.Log, messagesIDs []string) error {
+	return app.sharedDeleteMessages(l, messagesIDs, "")
 }
 
 func (app *Application) getAllAppVersions(orgID string, appID string) ([]model.AppVersion, error) {

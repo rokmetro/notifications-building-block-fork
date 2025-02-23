@@ -69,7 +69,11 @@ func getMessageData(inputMessage Def.SharedReqCreateMessage) model.InputMessage 
 	}
 
 	//TODO add topic to topics array
-	topics := inputMessage.Topics
+	topics := []string{}
+	topicsPointer := inputMessage.Topics
+	if topicsPointer != nil {
+		topics = *topicsPointer
+	}
 	if inputMessage.Topic != nil {
 		if topics != nil {
 			topics = append(topics, *inputMessage.Topic)

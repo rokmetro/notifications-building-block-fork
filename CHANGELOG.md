@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Scheduled notifications calculate recipients immediately [#190](https://github.com/rokwire/notifications-building-block/issues/190)
+
 ### Added
 - [VD-1162] Livestream notification logic [#1790](https://github.com/rokmetro/vogue-app/issues/1790)
 

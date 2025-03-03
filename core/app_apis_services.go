@@ -264,6 +264,10 @@ func (app *Application) deleteMessage(orgID string, appID string, ID string) err
 	return app.storage.DeleteMessagesWithContext(context.Background(), []string{ID})
 }
 
+func (app *Application) deleteMessages(l *logs.Log, messagesIDs []string) error {
+	return app.sharedDeleteMessages(l, messagesIDs, "")
+}
+
 func (app *Application) getAllAppVersions(orgID string, appID string) ([]model.AppVersion, error) {
 	return app.storage.GetAllAppVersions(orgID, appID)
 }

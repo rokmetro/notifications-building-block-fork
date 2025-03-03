@@ -1,5 +1,5 @@
 # Notifications Building Block
-The Notifications Building Block manages user notifications for the Rokwire platform.
+The Notifications Building Block manages user notifications for the Rokwire platform. 
 
 ## Documentation
 The functionality provided by this application is documented in the [Wiki](https://github.com/rokwire/notifications-building-block/wiki).
@@ -11,7 +11,7 @@ The API documentation is available here: https://api.rokwire.illinois.edu/notifi
 ### Prerequisites
 MongoDB v4.2.2+
 
-Go v1.22+
+Go v1.24+
 
 ### Environment variables
 The following Environment variables are supported. The service will not start unless those marked as Required are supplied.

@@ -172,7 +172,7 @@ type SharedReqCreateMessage struct {
 	Subject                  string                                         `json:"subject"`
 	Time                     *int64                                         `json:"time,omitempty"`
 	Topic                    *string                                        `json:"topic,omitempty"`
-	Topics                   []string                                       `json:"topics,omitempty"`
+	Topics                   *[]string                                      `json:"topics,omitempty"`
 }
 
 // SharedReqCreateMessageInputMessageRecipient defines model for _shared_req_CreateMessage_InputMessageRecipient.
@@ -222,6 +222,12 @@ type GetApiAdminMessagesStatsSourceSourceParams struct {
 
 // DeleteApiBbsMessagesParams defines parameters for DeleteApiBbsMessages.
 type DeleteApiBbsMessagesParams struct {
+	// Ids ids of the messages for deletion separated with comma
+	Ids string `json:"ids"`
+}
+
+// DeleteApiIntMessagesParams defines parameters for DeleteApiIntMessages.
+type DeleteApiIntMessagesParams struct {
 	// Ids ids of the messages for deletion separated with comma
 	Ids string `json:"ids"`
 }
@@ -300,6 +306,9 @@ type PostApiIntMailJSONRequestBody = ClientReqToken
 
 // PostApiIntMessageJSONRequestBody defines body for PostApiIntMessage for application/json ContentType.
 type PostApiIntMessageJSONRequestBody = SharedReqCreateMessage
+
+// PostApiIntMessagesJSONRequestBody defines body for PostApiIntMessages for application/json ContentType.
+type PostApiIntMessagesJSONRequestBody = SharedReqCreateMessages
 
 // PostApiIntV2MessageJSONRequestBody defines body for PostApiIntV2Message for application/json ContentType.
 type PostApiIntV2MessageJSONRequestBody = ClientReqMessageV2

@@ -242,7 +242,7 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 
 	if !delayCalc {
 		// recipients from topic
-		if topics != nil {
+		if len(topics) > 0 {
 			topicUsers, err := app.storage.GetUsersByTopicsWithContext(context, orgID,
 				appID, topics)
 			if err != nil {

@@ -282,7 +282,7 @@ func (q queueLogic) handleDelayedRecipientCalculation(queueItem model.QueueItem)
 	message, err := q.storage.GetMessage(queueItem.OrgID, queueItem.AppID, queueItem.MessageID)
 	if message == nil || err != nil {
 		err = fmt.Errorf("error finding delayed message (org_id: %s, app_id: %s, message_id: %s) - %s", queueItem.OrgID, queueItem.AppID, queueItem.MessageID, err)
-		q.logger.Errorf(err.Error())
+		q.logger.Error(err.Error())
 		return err
 	}
 
@@ -295,7 +295,7 @@ func (q queueLogic) handleDelayedRecipientCalculation(queueItem model.QueueItem)
 			message.RecipientAccountCriteria, message.Topics, message.ID, false)
 		if err != nil {
 			err = fmt.Errorf("error calculating delayed recipients for a message (%s): %s", message.ID, err)
-			q.logger.Errorf(err.Error())
+			q.logger.Error(err.Error())
 			return err
 		}
 
@@ -338,7 +338,7 @@ func (q queueLogic) handleDelayedRecipientCalculation(queueItem model.QueueItem)
 	err = q.storage.PerformTransaction(transaction, 2000)
 	if err != nil {
 		err = fmt.Errorf("error performing delayed recipients transaction - %s", err)
-		q.logger.Errorf(err.Error())
+		q.logger.Error(err.Error())
 		return err
 	}
 

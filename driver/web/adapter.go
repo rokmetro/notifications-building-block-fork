@@ -106,6 +106,7 @@ func (we Adapter) Start() {
 	mainRouter.HandleFunc("/topic/{topic}/subscribe", we.wrapFunc(we.apisHandler.Subscribe, we.auth.client.Standard)).Methods("POST")
 	mainRouter.HandleFunc("/topic/{topic}/unsubscribe", we.wrapFunc(we.apisHandler.Unsubscribe, we.auth.client.Standard)).Methods("POST")
 	mainRouter.HandleFunc("/push-subscription", we.wrapFunc(we.apisHandler.PushSubscription, we.auth.client.Standard)).Methods("POST")
+	mainRouter.HandleFunc("/user-data", we.wrapFunc(we.apisHandler.GetUserData, we.auth.client.Standard)).Methods("GET")
 
 	// Admin APIs
 	adminRouter := mainRouter.PathPrefix("/admin").Subrouter()

@@ -27,7 +27,7 @@ type Adapter struct {
 
 // PushSubscription creates a push subscription to a mastadon server
 func (a *Adapter) PushSubscription(userID string, mastadonToken string) (map[string]interface{}, error) {
-	url := fmt.Sprintf(a.mastodonHost)
+	url := a.mastodonHost
 
 	client := &http.Client{
 		Timeout: 120 * time.Second,

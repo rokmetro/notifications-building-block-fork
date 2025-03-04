@@ -511,6 +511,21 @@ func (sa Adapter) DeleteUserWithID(orgID string, appID string, userID string) er
 	return nil
 }
 
+// DeleteUsersWithIDs Deletes users
+func (sa Adapter) DeleteUsersWithIDs(ctx context.Context, orgID string, appID string, accountsIDs []string) error {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+		primitive.E{Key: "app_id", Value: appID},
+		primitive.E{Key: "user_id", Value: bson.M{"$in": accountsIDs}},
+	}
+
+	_, err := sa.db.users.DeleteManyWithContext(ctx, filter, nil)
+	if err != nil {
+		return errors.WrapErrorAction(logutils.ActionDelete, "user", nil, err)
+	}
+	return nil
+}
+
 // GetMessagesStats counts read/unread and muted/unmuted messages
 func (sa *Adapter) GetMessagesStats(userID string) (*model.MessagesStats, error) {
 	filter := bson.D{
@@ -889,6 +904,23 @@ func (sa Adapter) InsertMessagesRecipientsWithContext(ctx context.Context, items
 	return nil
 }
 
+// FindMessagesRecipientsByUserID finds messages recipients
+func (sa Adapter) FindMessagesRecipientsByUserID(orgID string, appID string, userID string) ([]model.MessageRecipient, error) {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+		primitive.E{Key: "app_id", Value: appID},
+		primitive.E{Key: "user_id", Value: userID},
+	}
+
+	var data []model.MessageRecipient
+	err := sa.db.messagesRecipients.Find(filter, &data, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 // DeleteMessagesRecipientsForIDsWithContext deletes messages recipients for ids
 func (sa Adapter) DeleteMessagesRecipientsForIDsWithContext(ctx context.Context, ids []string) error {
 	filter := bson.D{primitive.E{Key: "_id", Value: bson.M{"$in": ids}}}
@@ -903,6 +935,21 @@ func (sa Adapter) DeleteMessagesRecipientsForIDsWithContext(ctx context.Context,
 // DeleteMessagesRecipientsForMessagesWithContext deletes messages recipients for messages
 func (sa Adapter) DeleteMessagesRecipientsForMessagesWithContext(ctx context.Context, messagesIDs []string) error {
 	filter := bson.D{primitive.E{Key: "message_id", Value: bson.M{"$in": messagesIDs}}}
+
+	_, err := sa.db.messagesRecipients.DeleteManyWithContext(ctx, filter, nil)
+	if err != nil {
+		return errors.WrapErrorAction(logutils.ActionDelete, "message recipient", nil, err)
+	}
+	return nil
+}
+
+// DeleteMessagesRecipientsForUsers deletes messages recipients for users
+func (sa Adapter) DeleteMessagesRecipientsForUsers(ctx context.Context, orgID string, appID string, accountsIDs []string) error {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+		primitive.E{Key: "app_id", Value: appID},
+		primitive.E{Key: "user_id", Value: bson.M{"$in": accountsIDs}},
+	}
 
 	_, err := sa.db.messagesRecipients.DeleteManyWithContext(ctx, filter, nil)
 	if err != nil {
@@ -1303,6 +1350,36 @@ func (sa *Adapter) DeleteQueueDataForRecipientsWithContext(ctx context.Context, 
 		return errors.WrapErrorAction(logutils.ActionDelete, "queue data", nil, err)
 	}
 	return nil
+}
+
+// DeleteQueueDataForUsers removes queue data items for users
+func (sa *Adapter) DeleteQueueDataForUsers(ctx context.Context, orgID string, appID string, accountsIDs []string) error {
+	filter := bson.D{
+		primitive.E{Key: "org_id", Value: orgID},
+		primitive.E{Key: "app_id", Value: appID},
+		primitive.E{Key: "user_id", Value: bson.M{"$in": accountsIDs}},
+	}
+
+	_, err := sa.db.queueData.DeleteManyWithContext(ctx, filter, nil)
+	if err != nil {
+		return errors.WrapErrorAction(logutils.ActionDelete, "queue data", nil, err)
+	}
+	return nil
+}
+
+// FindQueueDataByUserID gets all queue data by userID
+func (sa Adapter) FindQueueDataByUserID(userID string) ([]model.QueueItem, error) {
+	filter := bson.D{
+		primitive.E{Key: "user_id", Value: userID},
+	}
+
+	var queue []model.QueueItem
+	err := sa.db.queueData.Find(filter, &queue, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return queue, nil
 }
 
 // StoreDeviceToken stores device token

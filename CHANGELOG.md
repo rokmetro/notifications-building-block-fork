@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add multiple topic support
 - Add CORS support
 
+## [1.23.0] - 2024-17-04
+### Changed
+- Support Google Trust Services as CA [#193](https://github.com/rokwire/notifications-building-block/issues/193)
+
 ## [1.22.0] - 2024-02-03
 ### Added
 - Consolidate the information, and make it accessible with a single API call [#184](https://github.com/rokwire/notifications-building-block/issues/184)

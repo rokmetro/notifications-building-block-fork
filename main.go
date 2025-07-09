@@ -90,11 +90,11 @@ func main() {
 	airshipBearerToken := envLoader.GetAndLogEnvVar(envPrefix+"AIRSHIP_BEARER_TOKEN", false, true)
 	airshipAdapter := airship.NewAirshipAdapter(airshipHost, airshipBearerToken)
 
-	smtpHost := envLoader.GetAndLogEnvVar("SMTP_HOST", true, false)
-	smtpPort := envLoader.GetAndLogEnvVar("SMTP_PORT", true, false)
-	smtpUser := envLoader.GetAndLogEnvVar("SMTP_USER", true, true)
-	smtpPassword := envLoader.GetAndLogEnvVar("SMTP_PASSWORD", true, true)
-	smtpFrom := envLoader.GetAndLogEnvVar("SMTP_EMAIL_FROM", true, true)
+	smtpHost := envLoader.GetAndLogEnvVar("SMTP_HOST", false, false)
+	smtpPort := envLoader.GetAndLogEnvVar("SMTP_PORT", false, false)
+	smtpUser := envLoader.GetAndLogEnvVar("SMTP_USER", false, false)
+	smtpPassword := envLoader.GetAndLogEnvVar("SMTP_PASSWORD", false, true)
+	smtpFrom := envLoader.GetAndLogEnvVar("SMTP_EMAIL_FROM", false, false)
 	smtpPortNum, _ := strconv.Atoi(smtpPort)
 	mailAdapter := mailer.NewMailerAdapter(smtpHost, smtpPortNum, smtpUser, smtpPassword, smtpFrom)
 

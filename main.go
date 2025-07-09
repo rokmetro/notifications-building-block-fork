@@ -15,7 +15,6 @@
 package main
 
 import (
-	"log"
 	"notifications/core"
 	"notifications/core/model"
 	"notifications/driven/airship"
@@ -27,14 +26,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rokwire/core-auth-library-go/v3/authservice"
-	"github.com/rokwire/core-auth-library-go/v3/authutils"
-	"github.com/rokwire/core-auth-library-go/v3/envloader"
-	"github.com/rokwire/core-auth-library-go/v3/keys"
-	"github.com/rokwire/core-auth-library-go/v3/sigauth"
-	"github.com/rokwire/logging-library-go/v2/errors"
-	"github.com/rokwire/logging-library-go/v2/logs"
-	"github.com/rokwire/logging-library-go/v2/logutils"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/keys"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/sigauth"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/envloader"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/errors"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/logging/logs"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/logging/logutils"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/rokwireutils"
 )
 
 var (
@@ -50,6 +49,7 @@ func main() {
 	}
 
 	serviceID := "notifications"
+	envPrefix := strings.ReplaceAll(strings.ToUpper(serviceID), "-", "_") + "_"
 
 	loggerOpts := logs.LoggerOpts{SuppressRequests: logs.NewStandardHealthCheckHTTPRequestProperties(serviceID + "/version")}
 	loggerOpts.SuppressRequests = append(loggerOpts.SuppressRequests, logs.NewStandardHealthCheckHTTPRequestProperties("notifications/api/version")...)
@@ -65,8 +65,8 @@ func main() {
 	mongoDBAuth := envLoader.GetAndLogEnvVar("MONGO_AUTH", true, true)
 	mongoDBName := envLoader.GetAndLogEnvVar("MONGO_DATABASE", true, false)
 	mongoTimeout := envLoader.GetAndLogEnvVar("MONGO_TIMEOUT", false, false)
-	mtOrgID := envLoader.GetAndLogEnvVar("NOTIFICATIONS_MULTI_TENANCY_ORG_ID", true, false)
-	mtAppID := envLoader.GetAndLogEnvVar("NOTIFICATIONS_MULTI_TENANCY_APP_ID", true, false)
+	mtOrgID := envLoader.GetAndLogEnvVar(envPrefix+"MULTI_TENANCY_ORG_ID", true, true)
+	mtAppID := envLoader.GetAndLogEnvVar(envPrefix+"MULTI_TENANCY_APP_ID", true, true)
 	storageAdapter := storage.NewStorageAdapter(mongoDBAuth, mongoDBName, mongoTimeout, mtOrgID, mtAppID, logger)
 	err := storageAdapter.Start()
 	if err != nil {
@@ -86,8 +86,8 @@ func main() {
 	}
 
 	//airship adapter
-	airshipHost := envLoader.GetAndLogEnvVar("NOTIFICATIONS_AIRSHIP_HOST", false, false)
-	airshipBearerToken := envLoader.GetAndLogEnvVar("NOTIFICATIONS_AIRSHIP_BEARER_TOKEN", false, true)
+	airshipHost := envLoader.GetAndLogEnvVar(envPrefix+"AIRSHIP_HOST", false, false)
+	airshipBearerToken := envLoader.GetAndLogEnvVar(envPrefix+"AIRSHIP_BEARER_TOKEN", false, true)
 	airshipAdapter := airship.NewAirshipAdapter(airshipHost, airshipBearerToken)
 
 	smtpHost := envLoader.GetAndLogEnvVar("SMTP_HOST", false, false)
@@ -102,48 +102,50 @@ func main() {
 	host := envLoader.GetAndLogEnvVar("HOST", true, false)
 	internalAPIKey := envLoader.GetAndLogEnvVar("INTERNAL_API_KEY", true, true)
 	coreBBHost := envLoader.GetAndLogEnvVar("CORE_BB_HOST", true, false)
-	notificationsServiceURL := envLoader.GetAndLogEnvVar("NOTIFICATIONS_SERVICE_URL", true, false)
+	notificationsServiceURL := envLoader.GetAndLogEnvVar(envPrefix+"SERVICE_URL", true, false)
 
-	authService := authservice.AuthService{
+	authService := auth.Service{
 		ServiceID:   serviceID,
 		ServiceHost: notificationsServiceURL,
 		FirstParty:  true,
 		AuthBaseURL: coreBBHost,
 	}
 
-	serviceRegLoader, err := authservice.NewRemoteServiceRegLoader(&authService, []string{"auth"})
+	serviceRegLoader, err := auth.NewRemoteServiceRegLoader(&authService, []string{"auth"})
 	if err != nil {
 		logger.Fatalf("Error initializing remote service registration loader: %v", err)
 	}
 
-	serviceRegManager, err := authservice.NewServiceRegManager(&authService, serviceRegLoader, !strings.HasPrefix(host, "http://localhost"))
+	serviceRegManager, err := auth.NewServiceRegManager(&authService, serviceRegLoader, !strings.HasPrefix(host, "http://localhost"))
 	if err != nil {
 		logger.Fatalf("Error initializing service registration manager: %v", err)
 	}
 
-	//core adapter
-	serviceAccountID := envLoader.GetAndLogEnvVar("NOTIFICATIONS_SERVICE_ACCOUNT_ID", false, false)
-	privKeyRaw := envLoader.GetAndLogEnvVar("NOTIFICATIONS_PRIV_KEY", false, true)
-	var serviceAccountManager *authservice.ServiceAccountManager
-	if privKeyRaw != "" {
-		privKeyRaw = strings.ReplaceAll(privKeyRaw, "\\n", "\n")
-		privKey, err := keys.NewPrivKey(keys.RS256, privKeyRaw)
-		if err != nil {
-			log.Fatalf("Failed to parse auth priv key: %v", err)
-		}
+	// Service account
+	var serviceAccountManager *auth.ServiceAccountManager
+
+	serviceAccountID := envLoader.GetAndLogEnvVar(envPrefix+"SERVICE_ACCOUNT_ID", false, false)
+	privKeyRaw := envLoader.GetAndLogEnvVar(envPrefix+"PRIV_KEY", true, true)
+	privKeyRaw = strings.ReplaceAll(privKeyRaw, "\\n", "\n")
+	privKey, err := keys.NewPrivKey(keys.RS256, privKeyRaw)
+	if err != nil {
+		logger.Errorf("Error parsing priv key: %v", err)
+	} else if serviceAccountID == "" {
+		logger.Errorf("Missing service account id")
+	} else {
 		signatureAuth, err := sigauth.NewSignatureAuth(privKey, serviceRegManager, false, false)
 		if err != nil {
-			log.Fatalf("Error initializing signature auth: %v", err)
+			logger.Fatalf("Error initializing signature auth: %v", err)
 		}
 
-		serviceAccountLoader, err := authservice.NewRemoteServiceAccountLoader(&authService, serviceAccountID, signatureAuth)
+		serviceAccountLoader, err := auth.NewRemoteServiceAccountLoader(&authService, serviceAccountID, signatureAuth)
 		if err != nil {
-			log.Fatalf("Error initializing remote service account loader: %v", err)
+			logger.Fatalf("Error initializing remote service account loader: %v", err)
 		}
 
-		serviceAccountManager, err = authservice.NewServiceAccountManager(&authService, serviceAccountLoader)
+		serviceAccountManager, err = auth.NewServiceAccountManager(&authService, serviceAccountLoader)
 		if err != nil {
-			log.Fatalf("Error initializing service account manager: %v", err)
+			logger.Fatalf("Error initializing service account manager: %v", err)
 		}
 	}
 
@@ -162,7 +164,7 @@ func main() {
 	// read CORS parameters from stored env config
 	var corsAllowedHeaders []string
 	var corsAllowedOrigins []string
-	envConfig, err := storageAdapter.FindConfig(model.ConfigTypeEnv, authutils.AllApps, authutils.AllOrgs)
+	envConfig, err := storageAdapter.FindConfig(model.ConfigTypeEnv, rokwireutils.AllApps, rokwireutils.AllOrgs)
 	if err != nil {
 		logger.Fatal(errors.WrapErrorAction(logutils.ActionFind, model.TypeConfig, nil, err).Error())
 	}

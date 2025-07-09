@@ -23,10 +23,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/rokwire/core-auth-library-go/v3/authutils"
-	"github.com/rokwire/core-auth-library-go/v3/tokenauth"
-	"github.com/rokwire/logging-library-go/v2/logs"
-	"github.com/rokwire/logging-library-go/v2/logutils"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/tokenauth"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/logging/logs"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/logging/logutils"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/rokwireutils"
 )
 
 func (app *Application) getVersion() string {
@@ -368,7 +368,7 @@ func (app *Application) getConfigs(configType *string, claims *tokenauth.Claims)
 
 func (app *Application) createConfig(config model.Configs, claims *tokenauth.Claims) (*model.Configs, error) {
 	// must be a system config if applying to all orgs
-	if config.OrgID == authutils.AllOrgs && !config.System {
+	if config.OrgID == rokwireutils.AllOrgs && !config.System {
 		return nil, fmt.Errorf("unauthorized to create config")
 
 	}
@@ -390,7 +390,7 @@ func (app *Application) createConfig(config model.Configs, claims *tokenauth.Cla
 
 func (app *Application) updateConfig(config model.Configs, claims *tokenauth.Claims) error {
 	// must be a system config if applying to all orgs
-	if config.OrgID == authutils.AllOrgs && !config.System {
+	if config.OrgID == rokwireutils.AllOrgs && !config.System {
 		return fmt.Errorf("unable to update config")
 	}
 

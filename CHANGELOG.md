@@ -10,14 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - [VD-1162] Livestream notification logic [#1790](https://github.com/rokmetro/vogue-app/issues/1790)
-
-### Added
 - Batch messages [#185](https://github.com/rokwire/notifications-building-block/issues/185)
 - Add in Airship Push Notifications [#173](https://github.com/rokwire/notifications-building-block/issues/173)
 - Add multiple topic support
 - Add CORS support
 
-## [1.23.0] - 2024-17-04
+## [1.24.0] - 2025-09-07
+### Changed
+- Replace auth library and logging library with Building Block SDK [#196](https://github.com/rokwire/notifications-building-block/issues/196)
+
+## [1.23.0] - 2025-17-04
 ### Changed
 - Support Google Trust Services as CA [#193](https://github.com/rokwire/notifications-building-block/issues/193)
 

@@ -26,9 +26,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rokwire/core-auth-library-go/v3/tokenauth"
-	"github.com/rokwire/logging-library-go/v2/logs"
-	"github.com/rokwire/logging-library-go/v2/logutils"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/tokenauth"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/logging/logs"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/logging/logutils"
 
 	"github.com/gorilla/mux"
 )
@@ -244,6 +244,28 @@ func (h ApisHandler) Unsubscribe(l *logs.Log, r *http.Request, claims *tokenauth
 	}
 
 	return l.HTTPResponseSuccess()
+}
+
+// GetUserData Get the user data
+// @Description Get the user data
+// @Tags Client
+// @ID Unsubscribe
+// @Param data body tokenBody true "body json"
+// @Success 200
+// @Security RokwireAuth UserAuth
+// @Router /user-data [get]
+func (h ApisHandler) GetUserData(l *logs.Log, r *http.Request, claims *tokenauth.Claims) logs.HTTPResponse {
+	userData, err := h.app.Services.GetUserData(claims.OrgID, claims.AppID, claims.Subject)
+	if err != nil {
+		return l.HTTPResponseErrorAction(logutils.ActionUpdate, "user", nil, err, http.StatusInternalServerError, true)
+	}
+
+	responseData, err := json.Marshal(userData)
+	if err != nil {
+		return l.HTTPResponseErrorAction(logutils.ActionMarshal, logutils.TypeResponseBody, nil, err, http.StatusInternalServerError, true)
+	}
+
+	return l.HTTPResponseSuccessJSON(responseData)
 }
 
 // TODO - for now all fields but almost all of them will be removed!

@@ -20,8 +20,8 @@ import (
 	"notifications/driven/storage"
 	"time"
 
-	"github.com/rokwire/core-auth-library-go/v3/tokenauth"
-	"github.com/rokwire/logging-library-go/v2/logs"
+	"github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/tokenauth"
+	"github.com/rokwire/rokwire-building-block-sdk-go/utils/logging/logs"
 )
 
 // Services exposes APIs for the driver adapters
@@ -36,6 +36,7 @@ type Services interface {
 	FindUserByID(orgID string, appID string, userID string, l *logs.Log) (*model.User, error)
 	UpdateUserByID(orgID string, appID string, userID string, notificationsEnabled bool) (*model.User, error)
 	DeleteUserWithID(orgID string, appID string, userID string) error
+	GetUserData(orgID string, appID string, userID string) (*model.UserDataResponse, error)
 
 	GetMessagesRecipientsDeep(orgID string, appID string, userID *string, read *bool, mute *bool, messageIDs []string, startDateEpoch *int64, endDateEpoch *int64, filterTopic *string, offset *int64, limit *int64, order *string) ([]model.MessageRecipient, error)
 
@@ -83,6 +84,10 @@ func (s *servicesImpl) SubscribeToTopic(orgID string, appID string, token string
 
 func (s *servicesImpl) UnsubscribeToTopic(orgID string, appID string, token string, userID string, anonymous bool, topic string) error {
 	return s.app.unsubscribeToTopic(orgID, appID, token, userID, anonymous, topic)
+}
+
+func (s *servicesImpl) GetUserData(orgID string, appID string, userID string) (*model.UserDataResponse, error) {
+	return s.app.getUserData(orgID, appID, userID)
 }
 
 func (s *servicesImpl) GetTopics(orgID string, appID string) ([]model.Topic, error) {
@@ -252,6 +257,7 @@ type Storage interface {
 	InsertUser(orgID string, appID string, userID string) (*model.User, error)
 	UpdateUserByID(orgID string, appID string, userID string, notificationsEnabled bool) (*model.User, error)
 	DeleteUserWithID(orgID string, appID string, userID string) error
+	DeleteUsersWithIDs(ctx context.Context, orgID string, appID string, accountsIDs []string) error
 
 	FindUserByToken(orgID string, appID string, token string) (*model.User, error)
 	StoreDeviceToken(orgID string, appID string, tokenInfo *model.TokenInfo, userID string) error
@@ -268,9 +274,12 @@ type Storage interface {
 	FindMessagesRecipientsByMessageAndUsers(messageID string, usersIDs []string) ([]model.MessageRecipient, error)
 	FindMessagesRecipientsByMessages(messagesIDs []string) ([]model.MessageRecipient, error)
 	FindMessagesRecipientsDeep(orgID string, appID string, userID *string, read *bool, mute *bool, messageIDs []string, startDateEpoch *int64, endDateEpoch *int64, filterTopic *string, offset *int64, limit *int64, order *string) ([]model.MessageRecipient, error)
+	FindMessagesRecipientsByUserID(orgID string, appID string, userID string) ([]model.MessageRecipient, error)
+
 	InsertMessagesRecipientsWithContext(ctx context.Context, items []model.MessageRecipient) error
 	DeleteMessagesRecipientsForIDsWithContext(ctx context.Context, ids []string) error
 	DeleteMessagesRecipientsForMessagesWithContext(ctx context.Context, messagesIDs []string) error
+	DeleteMessagesRecipientsForUsers(ctx context.Context, orgID string, appID string, accountsIDs []string) error
 
 	FindMessagesWithContext(ctx context.Context, ids []string) ([]model.Message, error)
 	FindMessagesByParams(orgID string, appID string, senderType string, senderAccountID *string, offset *int64, limit *int64, order *string) ([]model.Message, error)
@@ -293,9 +302,11 @@ type Storage interface {
 	SaveQueue(queue model.Queue) error
 
 	FindQueueData(time *time.Time, limit int) ([]model.QueueItem, error)
+	FindQueueDataByUserID(userID string) ([]model.QueueItem, error)
 	DeleteQueueData(ids []string) error
 	DeleteQueueDataForMessagesWithContext(ctx context.Context, messagesIDs []string) error
 	DeleteQueueDataForRecipientsWithContext(ctx context.Context, recipientsIDs []string) error
+	DeleteQueueDataForUsers(ctx context.Context, orgID string, appID string, accountsIDs []string) error
 
 	FindConfig(configType string, appID string, orgID string) (*model.Configs, error)
 	FindConfigByID(id string) (*model.Configs, error)
@@ -322,6 +333,7 @@ type Mailer interface {
 // Core exposes Core APIs for the driver adapters
 type Core interface {
 	RetrieveCoreUserAccountByCriteria(accountCriteria map[string]interface{}, appID *string, orgID *string) ([]model.CoreAccount, error)
+	LoadDeletedMemberships() ([]model.DeletedUserData, error)
 }
 
 // Airship is used to wrap all Airship Messaging API Functions

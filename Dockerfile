@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.24-alpine as builder
+FROM public.ecr.aws/docker/library/golang:1.24-alpine as builder
 
 ENV CGO_ENABLED=0
 
@@ -10,10 +10,10 @@ WORKDIR /app
 COPY . .
 RUN make
 
-FROM alpine:3.17
+FROM public.ecr.aws/docker/library/alpine:3.21.3
 
-#we need timezone database
-RUN apk add --no-cache --update tzdata
+#we need timezone database + certificates
+RUN apk add --no-cache tzdata ca-certificates
 
 COPY --from=builder /app/bin/notifications /
 COPY --from=builder /app/driver/web/docs/gen/def.yaml /driver/web/docs/gen/def.yaml
@@ -22,8 +22,8 @@ COPY --from=builder /app/driver/web/client_permission_policy.csv /driver/web/cli
 COPY --from=builder /app/driver/web/admin_permission_policy.csv /driver/web/admin_permission_policy.csv
 COPY --from=builder /app/driver/web/bbs_permission_policy.csv /driver/web/bbs_permission_policy.csv
 
-COPY --from=builder /app/vendor/github.com/rokwire/core-auth-library-go/v3/authorization/authorization_model_scope.conf /app/vendor/github.com/rokwire/core-auth-library-go/v3/authorization/authorization_model_scope.conf
-COPY --from=builder /app/vendor/github.com/rokwire/core-auth-library-go/v3/authorization/authorization_model_string.conf /app/vendor/github.com/rokwire/core-auth-library-go/v3/authorization/authorization_model_string.conf
+COPY --from=builder /app/vendor/github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/authorization/authorization_model_scope.conf /app/vendor/github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/authorization/authorization_model_scope.conf
+COPY --from=builder /app/vendor/github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/authorization/authorization_model_string.conf /app/vendor/github.com/rokwire/rokwire-building-block-sdk-go/services/core/auth/authorization/authorization_model_string.conf
 
 
 COPY --from=builder /etc/passwd /etc/passwd

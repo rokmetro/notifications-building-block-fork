@@ -10,14 +10,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - [VD-1162] Livestream notification logic [#1790](https://github.com/rokmetro/vogue-app/issues/1790)
-
-### Added
 - Batch messages [#185](https://github.com/rokwire/notifications-building-block/issues/185)
 - Add in Airship Push Notifications [#173](https://github.com/rokwire/notifications-building-block/issues/173)
 - Add multiple topic support
 - Add CORS support
 
+## [1.24.0] - 2025-09-07
+### Changed
+- Replace auth library and logging library with Building Block SDK [#196](https://github.com/rokwire/notifications-building-block/issues/196)
+
+## [1.23.0] - 2025-17-04
+### Changed
+- Support Google Trust Services as CA [#193](https://github.com/rokwire/notifications-building-block/issues/193)
+
+## [1.22.0] - 2024-02-03
+### Added
+- Consolidate the information, and make it accessible with a single API call [#184](https://github.com/rokwire/notifications-building-block/issues/184)
+
+## [1.21.1] - 2024-09-06
+### Fixed
+- Group Members receive Post Notifications even when Groups Notifications are overridden and disabled. [#181](https://github.com/rokwire/notifications-building-block/issues/181)
+
+## [1.21.0] - 2024-06-26
+### Fixed
+- Problem while deleting recipients from BB API [#178](https://github.com/rokwire/notifications-building-block/issues/178)
+
+## [1.20.0] - 2024-06-06
+### Added
+- Remove user data [#175](https://github.com/rokwire/notifications-building-block/issues/175)
+
 ## [1.19.0] - 2023-10-26
+
 ## [1.18.0] - 2023-09-20
 ### Changed
 - Use message.time field as a primary delivery time indicator [#168](https://github.com/rokwire/notifications-building-block/issues/168)

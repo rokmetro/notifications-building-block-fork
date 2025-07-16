@@ -125,27 +125,29 @@ func main() {
 	var serviceAccountManager *auth.ServiceAccountManager
 
 	serviceAccountID := envLoader.GetAndLogEnvVar(envPrefix+"SERVICE_ACCOUNT_ID", false, false)
-	privKeyRaw := envLoader.GetAndLogEnvVar(envPrefix+"PRIV_KEY", true, true)
+	privKeyRaw := envLoader.GetAndLogEnvVar(envPrefix+"PRIV_KEY", false, true)
 	privKeyRaw = strings.ReplaceAll(privKeyRaw, "\\n", "\n")
-	privKey, err := keys.NewPrivKey(keys.RS256, privKeyRaw)
-	if err != nil {
-		logger.Errorf("Error parsing priv key: %v", err)
-	} else if serviceAccountID == "" {
-		logger.Errorf("Missing service account id")
-	} else {
-		signatureAuth, err := sigauth.NewSignatureAuth(privKey, serviceRegManager, false, false)
+	if privKeyRaw != "" {
+		privKey, err := keys.NewPrivKey(keys.RS256, privKeyRaw)
 		if err != nil {
-			logger.Fatalf("Error initializing signature auth: %v", err)
-		}
+			logger.Errorf("Error parsing priv key: %v", err)
+		} else if serviceAccountID == "" {
+			logger.Errorf("Missing service account id")
+		} else {
+			signatureAuth, err := sigauth.NewSignatureAuth(privKey, serviceRegManager, false, false)
+			if err != nil {
+				logger.Fatalf("Error initializing signature auth: %v", err)
+			}
 
-		serviceAccountLoader, err := auth.NewRemoteServiceAccountLoader(&authService, serviceAccountID, signatureAuth)
-		if err != nil {
-			logger.Fatalf("Error initializing remote service account loader: %v", err)
-		}
+			serviceAccountLoader, err := auth.NewRemoteServiceAccountLoader(&authService, serviceAccountID, signatureAuth)
+			if err != nil {
+				logger.Fatalf("Error initializing remote service account loader: %v", err)
+			}
 
-		serviceAccountManager, err = auth.NewServiceAccountManager(&authService, serviceAccountLoader)
-		if err != nil {
-			logger.Fatalf("Error initializing service account manager: %v", err)
+			serviceAccountManager, err = auth.NewServiceAccountManager(&authService, serviceAccountLoader)
+			if err != nil {
+				logger.Fatalf("Error initializing service account manager: %v", err)
+			}
 		}
 	}
 

@@ -114,7 +114,7 @@ func (app *Application) sharedCreateMessages(imMessages []model.InputMessage, is
 	}
 
 	//perform transactions
-	err = app.storage.PerformTransaction(transaction, 10000) //10 seconds timeout
+	err = app.storage.PerformTransaction(transaction, app.messagesTransactionTimeout) //timeout in milliseconds
 	if err != nil {
 		fmt.Printf("error performing create message transaction - %s", err)
 		return nil, err

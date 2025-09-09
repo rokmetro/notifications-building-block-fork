@@ -63,6 +63,8 @@ type Application struct {
 
 	//delete data logic
 	deleteDataLogic deleteDataLogic
+
+	messagesTransactionTimeout int64
 }
 
 // Start starts the core part of the application
@@ -76,14 +78,14 @@ func (app *Application) Start() {
 }
 
 // NewApplication creates new Application
-func NewApplication(version string, build string, storage Storage, firebase Firebase, mailer *mailer.Adapter, logger *logs.Logger, core *core.Adapter, airship Airship) *Application {
-
+func NewApplication(version string, build string, storage Storage, firebase Firebase, mailer *mailer.Adapter, logger *logs.Logger, core *core.Adapter, airship Airship, messagesTransactionTimeout int64) *Application {
 	timerDone := make(chan bool)
 
 	deleteDataLogic := deleteDataLogic{logger: *logger, coreAdapter: core, storage: storage}
 
 	application := Application{version: version, build: build, storage: storage, firebase: firebase,
-		mailer: mailer, logger: logger, core: core, deleteDataLogic: deleteDataLogic, airship: airship}
+		mailer: mailer, logger: logger, core: core, deleteDataLogic: deleteDataLogic, airship: airship,
+		messagesTransactionTimeout: messagesTransactionTimeout}
 
 	//add the drivers ports/interfaces
 	application.Services = &servicesImpl{app: &application}

@@ -160,7 +160,14 @@ func main() {
 	}
 
 	// application
-	application := core.NewApplication(Version, Build, storageAdapter, firebaseAdapter, mailAdapter, logger, coreAdapter, airshipAdapter)
+	messagesTransactionTimeoutRaw := envLoader.GetAndLogEnvVar(envPrefix+"MESSAGES_TRANSACTION_TIMEOUT", false, false)
+	messagesTransactionTimeout, err := strconv.ParseInt(messagesTransactionTimeoutRaw, 10, 64)
+	if err != nil {
+		logger.Info("Set default messages transaction timeout - 30000")
+		messagesTransactionTimeout = 30000
+	}
+
+	application := core.NewApplication(Version, Build, storageAdapter, firebaseAdapter, mailAdapter, logger, coreAdapter, airshipAdapter, messagesTransactionTimeout)
 	application.Start()
 
 	// read CORS parameters from stored env config

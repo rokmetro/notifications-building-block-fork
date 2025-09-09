@@ -349,12 +349,15 @@ func (sa Adapter) GetDeviceTokensByRecipients(orgID string, appID string, recipi
 }
 
 // GetUsersByTopicsWithContext Gets all users for topics
-func (sa Adapter) GetUsersByTopicsWithContext(ctx context.Context, orgID string, appID string, topics []string) ([]model.User, error) {
+func (sa Adapter) GetUsersByTopicsWithContext(ctx context.Context, orgID string, appID string, topics []string, usersIDs []string) ([]model.User, error) {
 	if len(topics) > 0 {
 		filter := bson.D{
 			primitive.E{Key: "org_id", Value: orgID},
 			primitive.E{Key: "app_id", Value: appID},
 			primitive.E{Key: "topics", Value: bson.M{"$in": topics}},
+		}
+		if usersIDs != nil {
+			filter = append(filter, primitive.E{Key: "user_id", Value: bson.M{"$in": usersIDs}})
 		}
 
 		var tokenMappings []model.User
@@ -377,7 +380,7 @@ func (sa Adapter) GetUsersByTopicsWithContext(ctx context.Context, orgID string,
 }
 
 // GetUsersByRecipientCriteriasWithContext gets users list by list of criteria
-func (sa Adapter) GetUsersByRecipientCriteriasWithContext(ctx context.Context, orgID string, appID string, recipientCriterias []model.RecipientCriteria) ([]model.User, error) {
+func (sa Adapter) GetUsersByRecipientCriteriasWithContext(ctx context.Context, orgID string, appID string, recipientCriterias []model.RecipientCriteria, usersIDs []string) ([]model.User, error) {
 	if len(recipientCriterias) > 0 {
 		var users []model.User
 		innerFilter := []interface{}{}
@@ -399,6 +402,10 @@ func (sa Adapter) GetUsersByRecipientCriteriasWithContext(ctx context.Context, o
 			primitive.E{Key: "org_id", Value: orgID},
 			primitive.E{Key: "app_id", Value: appID},
 			primitive.E{Key: "$or", Value: innerFilter},
+		}
+
+		if usersIDs != nil {
+			filter = append(filter, primitive.E{Key: "user_id", Value: bson.M{"$in": usersIDs}})
 		}
 
 		err := sa.db.users.FindWithContext(ctx, filter, &users, nil)

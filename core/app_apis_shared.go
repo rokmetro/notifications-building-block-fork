@@ -223,6 +223,11 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 	checkCriteria := true
 	now := time.Now()
 
+	var userIds []string
+	if recipients != nil {
+		userIds = make([]string, len(recipients))
+	}
+
 	// recipients from message
 	if len(recipients) > 0 {
 		list := make([]model.MessageRecipient, len(recipients))
@@ -235,6 +240,7 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 			item.DateCreated = &now
 
 			list[i] = item
+			userIds[i] = item.UserID
 		}
 
 		messageRecipients = append(messageRecipients, list...)
@@ -244,7 +250,7 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 		// recipients from topic
 		if len(topics) > 0 {
 			topicUsers, err := app.storage.GetUsersByTopicsWithContext(context, orgID,
-				appID, topics)
+				appID, topics, userIds)
 			if err != nil {
 				fmt.Printf("error retrieving recipients by topic (%s): %s", topics, err)
 				return nil, err
@@ -277,7 +283,7 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 		// recipients from criteria
 		if len(recipientsCriteriaList) > 0 && checkCriteria {
 			criteriaUsers, err := app.storage.GetUsersByRecipientCriteriasWithContext(context,
-				orgID, appID, recipientsCriteriaList)
+				orgID, appID, recipientsCriteriaList, userIds)
 			if err != nil {
 				fmt.Printf("error retrieving recipients by criteria: %s", err)
 				return nil, err

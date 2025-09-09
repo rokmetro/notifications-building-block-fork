@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Scheduled notifications calculate recipients immediately [#190](https://github.com/rokwire/notifications-building-block/issues/190)
+- Full topic list loaded when recipients are specified
 
 ### Added
 - [VD-1162] Livestream notification logic [#1790](https://github.com/rokmetro/vogue-app/issues/1790)

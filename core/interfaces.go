@@ -262,8 +262,8 @@ type Storage interface {
 	FindUserByToken(orgID string, appID string, token string) (*model.User, error)
 	StoreDeviceToken(orgID string, appID string, tokenInfo *model.TokenInfo, userID string) error
 	GetDeviceTokensByRecipients(orgID string, appID string, recipient []model.MessageRecipient, criteriaList []model.RecipientCriteria) ([]string, error)
-	GetUsersByTopicsWithContext(ctx context.Context, orgID string, appID string, topic []string) ([]model.User, error)
-	GetUsersByRecipientCriteriasWithContext(ctx context.Context, orgID string, appID string, recipientCriterias []model.RecipientCriteria) ([]model.User, error)
+	GetUsersByTopicsWithContext(ctx context.Context, orgID string, appID string, topic []string, usersIDs []string) ([]model.User, error)
+	GetUsersByRecipientCriteriasWithContext(ctx context.Context, orgID string, appID string, recipientCriterias []model.RecipientCriteria, usersIDs []string) ([]model.User, error)
 	SubscribeToTopic(orgID string, appID string, token string, userID string, topic string) error
 	UnsubscribeToTopic(orgID string, appID string, token string, userID string, topic string) error
 	GetTopics(orgID string, appID string) ([]model.Topic, error)

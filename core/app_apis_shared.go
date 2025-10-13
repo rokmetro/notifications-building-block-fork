@@ -224,12 +224,10 @@ func (app *Application) sharedCalculateRecipients(context storage.TransactionCon
 	now := time.Now()
 
 	var userIds []string
-	if recipients != nil {
-		userIds = make([]string, len(recipients))
-	}
 
 	// recipients from message
 	if len(recipients) > 0 {
+		userIds = make([]string, len(recipients))
 		list := make([]model.MessageRecipient, len(recipients))
 		for i, item := range recipients {
 			item.OrgID = orgID
